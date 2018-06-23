@@ -1,6 +1,9 @@
 //= require cable
 
 App.activateAppearanceChannel = function(awaySelector, returnSelector, dataSelector, disconnectSelector) {
+
+  App.initializeCable();
+
   App.cable.subscriptions.create('AppearanceChannel', {
     // Called when the subscription is ready for use on the server.
     connected: function() {

@@ -6,6 +6,7 @@
 (function() {
   this.App || (this.App = {});
 
-  App.cable = ActionCable.createConsumer();
-
+  App.initializeCable = function() {
+    App.cable || (App.cable = ActionCable.createConsumer());
+  };
 }).call(this);
