@@ -1,8 +1,10 @@
 development:
-  adapter: async
+  adapter: redis
+  channel_prefix: web_socket_tennis_development
 
 test:
-  adapter: async
+  adapter: redis
+  channel_prefix: web_socket_tennis_test
 
 production:
   adapter: redis
