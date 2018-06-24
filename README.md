@@ -14,7 +14,11 @@ Recommend brew installing some things.
 
 Recommend rbenv with ruby-build.
 
+```
+brew install redis
+brew services start redis
 gem install bundler
+```
 
 For some reason `bundle exec rails` is printing a bunch of 'already initialized constant' warnings. Use the bin stubs: `bin/rails`, `bin/rake`, etc.
 
@@ -38,7 +42,11 @@ No tests yet.
 
 ## Services (job queues, cache servers, search engines, etc.)
 
-Nothing yet.
+```
+bundle exec sidekiq
+```
+
+To do: run sidekiq and rails server at the same time with foreman.
 
 ## Deployment instructions
 
