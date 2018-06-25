@@ -12,3 +12,5 @@
 //
 //= require rails-ujs
 //= require cable/subscriptions/appearance
+//= require cable/subscriptions/game
+//= require cable/subscriptions/match_making

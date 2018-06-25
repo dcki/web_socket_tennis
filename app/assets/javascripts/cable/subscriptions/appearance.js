@@ -4,7 +4,7 @@ App.activateAppearanceChannel = function(awaySelector, returnSelector, dataSelec
 
   App.initializeCable();
 
-  App.cable.subscriptions.create('AppearanceChannel', {
+  return App.cable.subscriptions.create('AppearanceChannel', {
     // Called when the subscription is ready for use on the server.
     connected: function() {
       this.install();
