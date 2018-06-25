@@ -16,3 +16,17 @@
 .hidden {
     display: none;
 }
+.flash_error {
+    border: solid red 1px;
+}
+.action-body {
+    margin: 20px;
+}
+nav {
+    padding: 20px;
+    background: powderblue;
+}
+html, body {
+    padding: 0;
+    margin: 0;
+}

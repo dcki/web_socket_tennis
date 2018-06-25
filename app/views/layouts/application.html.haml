@@ -1,0 +1,23 @@
+!!!
+%html
+  %head
+    %title WebSocketTennis
+    = csrf_meta_tags
+    = csp_meta_tag
+
+    = stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload'
+    = javascript_include_tag 'application', 'data-turbolinks-track': 'reload'
+
+  %body
+    %nav
+      - if current_user
+        Logged in as #{current_user.name}.
+        = link_to 'Log out', session_path(current_user.id), method: :delete
+      - else
+        = link_to 'Log in', new_session_path
+
+    - flash.each do |name, msg|
+      %div{ class: class_for_flash(name) }= msg
+
+    .action-body
+      = yield
