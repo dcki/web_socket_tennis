@@ -6,6 +6,12 @@ class GameChannel < ApplicationCable::Channel
   end
 
   def unsubscribed
+    @redis.publish(
+      "game:player#{current_user.id}",
+      {
+        command: 'die',
+      }.to_json
+    )
   end
 
   # Is this covered by unsubscribed?

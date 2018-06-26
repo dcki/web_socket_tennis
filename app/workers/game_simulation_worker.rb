@@ -7,6 +7,27 @@ class GameSimulationWorker
 
     redis = Redis.new
 
+    # Autoload before referencing in thread because that causes some kind of deadlock
+    # and the thread never wakes up again if it tries to autoload this.
+    GameChannel
+
+    # TODO Get thread from a pool.
+    thr = Thread.new do
+
+      sleep(0.1) until @player1_paddle_state && @player2_paddle_state
+
+      100.times do
+        message = {
+          event: 'update',
+          paddle1: @player1_paddle_state,
+          paddle2: @player2_paddle_state,
+        }
+        GameChannel.broadcast_to(player1, message)
+        GameChannel.broadcast_to(player2, message)
+        sleep 0.1
+      end
+    end
+
     begin
       redis.subscribe(redis_pubsub_channel(player1), redis_pubsub_channel(player2)) do |on|
         on.subscribe do |channel, subscriptions|
@@ -18,6 +39,12 @@ class GameSimulationWorker
           #redis.unsubscribe if message == "exit"
 
           message = MultiJson.load(message, symbolize_keys: true)
+
+          if message[:command] == 'die'
+            redis.unsubscribe
+            next
+          end
+
           paddle_state = message[:paddle_state]
           time_published = Time.parse(message[:time_published])
 
@@ -30,10 +57,6 @@ class GameSimulationWorker
           when redis_pubsub_channel(player2)
             @player2_paddle_state = paddle_state if valid_paddle_state?(paddle_state)
           end
-
-          # This shouldn't be here. Maybe put it in another thread.
-          GameChannel.broadcast_to(player1, event: 'update', paddle1: @player1_paddle_state, paddle2: @player2_paddle_state)
-          GameChannel.broadcast_to(player2, event: 'update', paddle1: @player1_paddle_state, paddle2: @player2_paddle_state)
         end
 
         on.unsubscribe do |channel, subscriptions|
@@ -46,15 +69,7 @@ class GameSimulationWorker
       retry
     end
 
-    # Seems like we never get here. I guess the subscribe block above holds onto execution.
-
-    sleep(0.1) until @player1_paddle_state && @player2_paddle_state
-
-    100.times do
-      GameChannel.broadcast_to(player1, event: 'update', paddle1: @player1_paddle_state, paddle2: @player2_paddle_state)
-      GameChannel.broadcast_to(player2, event: 'update', paddle1: @player1_paddle_state, paddle2: @player2_paddle_state)
-      sleep 0.1
-    end
+    thr.join
 
     GameChannel.broadcast_to(player1, event: 'end')
     GameChannel.broadcast_to(player2, event: 'end')
