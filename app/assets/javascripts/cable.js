@@ -9,4 +9,8 @@
   App.initializeCable = function() {
     App.cable || (App.cable = ActionCable.createConsumer());
   };
+  App.createCableSubscription = function(channelName, mixin) {
+    App.initializeCable();
+    return App.cable.subscriptions.create(channelName, mixin);
+  };
 }).call(this);

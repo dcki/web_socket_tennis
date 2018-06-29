@@ -30,3 +30,12 @@ html, body {
     padding: 0;
     margin: 0;
 }
+.game-field {
+    margin: 10px;
+    border: solid 2px black;
+    position: relative;
+}
+.game-field .paddle-1, .game-field .paddle-2, .game-field .ball {
+    background-color: black;
+    position: absolute;
+}

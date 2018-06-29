@@ -1,9 +1,27 @@
+.find-game
+  = label_tag 'min_velocity'
+  = number_field_tag 'min_velocity', 1, in: 1..10
+  = label_tag 'max_velocity'
+  = number_field_tag 'max_velocity', 1, in: 1..10
+  = button_tag 'start', class: 'start'
+  = button_tag 'stop', class: 'stop'
+  .message.hidden Waiting for competitor
+
+.game-field.hidden
+  .paddle-1
+  .ball
+  .paddle-2
+
 :javascript
   (function() {
-    var mm = App.activateMatchMakingChannel();
-    var game = App.activateGameChannel();
-    setInterval(function() {
-      var i = Math.floor(Math.random() * 3);
-      game.perform('paddle', { paddle_state: ['up', 'down', 'stop'][i] });
-    }, 500);
+    var restart = function() {
+      var game = App.newGame({
+        matchMakingElement: document.querySelector('.find-game'),
+        gameElement: document.querySelector('.game-field')
+      });
+      game.setOnEndCallback(function() {
+        setTimeout(restart, 0);
+      });
+    };
+    restart();
   })();

@@ -1,4 +1,6 @@
 class Competitor < ApplicationRecord
+  belongs_to :user
+
   validates :max_velocity, :min_velocity, presence: true, numericality: { greater_than: 0 }
   validate do
     if max_velocity && min_velocity
