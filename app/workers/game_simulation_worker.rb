@@ -133,6 +133,13 @@ class GameSimulationWorker
           # Ignore old messages.
           next if time_published < (Time.now - 0.5.seconds)
 
+          # TODO This code is only executed when a message is received. It's plausible
+          # there may be times when the clients stop sending messages so the unsubscribe
+          # never occurs. (I tried calling redis.unsubscribe from the other thread but I
+          # got an error like "can't unsubscribe if not subscribed". Maybe the
+          # subscription is in memory that is not shared with the thread. Though I think
+          # any thread can access any other thread's context explicitly so that might be
+          # an option.)
           if message[:command] == 'die' || @quit
             redis.unsubscribe
             @quit = true
