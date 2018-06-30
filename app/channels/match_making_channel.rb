@@ -29,7 +29,7 @@ class MatchMakingChannel < ApplicationCable::Channel
         competitor.destroy
         game = Game.create!
         game.users << [competitor.user, current_user]
-        GameSimulationWorker.perform_async(game.id)
+        GameSimulationWorker.perform_async(game.id, [competitor.max_velocity, max_velocity].min)
       else
         Competitor.create!(user_id: current_user.id, min_velocity: min_velocity, max_velocity: max_velocity)
       end
