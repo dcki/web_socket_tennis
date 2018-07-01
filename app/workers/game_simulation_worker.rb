@@ -166,7 +166,7 @@ class GameSimulationWorker
 
     thr.join
 
-    game.destroy
+    game.update_attribute(:completed_at, Time.now)
 
     GameChannel.broadcast_to(player1, game_over: true)
     GameChannel.broadcast_to(player2, game_over: true)
