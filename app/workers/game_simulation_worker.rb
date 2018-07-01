@@ -111,7 +111,7 @@ class GameSimulationWorker
 
         GameChannel.broadcast_to(player1, message)
         GameChannel.broadcast_to(player2, message)
-        sleep 0.01
+        sleep 0.02
       end
     end
 
