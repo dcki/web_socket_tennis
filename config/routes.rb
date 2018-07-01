@@ -3,5 +3,4 @@ Rails.application.routes.draw do
   root to: redirect('/game')
   resources :sessions
   get '/game', to: 'game#show'
-  get '/appearance', to: 'appearance#show'
 end

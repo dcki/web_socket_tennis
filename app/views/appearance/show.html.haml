@@ -1,6 +1,0 @@
-#data{ data: { 'appearing-on' => "I don't know what 'appearing on' is supposed to mean. Current time?" } }
-%button.hidden{ data: { behavior: 'appear_away' } } Appear away
-%button.hidden{ data: { behavior: 'appear_not_away' } } Appear present
-%button.hidden{ data: { behavior: 'disconnect' } } Disconnect
-:javascript
-  App.activateAppearanceChannel('[data-behavior~=appear_away]', '[data-behavior~=appear_not_away]', '#data', '[data-behavior~=disconnect]');

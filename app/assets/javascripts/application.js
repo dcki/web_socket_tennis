@@ -11,5 +11,4 @@
 // about supported directives.
 //
 //= require rails-ujs
-//= require cable/subscriptions/appearance
 //= require cable/subscriptions/game
