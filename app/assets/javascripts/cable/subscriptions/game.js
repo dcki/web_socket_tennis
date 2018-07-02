@@ -7,25 +7,48 @@ App.newGame = function(options) {
       this.matchMakingElement = options.matchMakingElement;
       this.messageEl = this.matchMakingElement.querySelector('.message');
       this.subscribeToMatchMaking();
-      this.subscribeToGame();
       this.initializeEventHandlers();
     },
+    // TODO move matchmaking subscription out of game "class" and share it between
+    // game instances to avoid race condition with unsubscribing and re-subscribing
+    // too close together.
+    //
+    // I think a possible race condition could lead to being in an erroneous
+    // unsubscribed state, because the unsubscribe message may sometimes arrive after
+    // the re-subscribe message. At least, I've seen a behavior for which that seems
+    // like a potential explanation. After a game has ended, something prevents a new
+    // game from starting, and this error occurs every time a client sends a game
+    // update message:
+    //
+    // Could not execute command from ({"command"=>"message", "identifier"=>"{\"channel\":\"GameChannel\"}", "data"=>"{\"paddle_state\":\"stop\",\"action\":\"paddle\"}"}) [RuntimeError - Unable to find subscription with identifier: {"channel":"GameChannel"}]
+    //
+    // Either there are multiple action cable workers processing the messages concurrently
+    // (I haven't checked) or action cable web socket messages can arrive out of order (I
+    // haven't researched that yet). Or there is another explanation for that behavior and
+    // error.
+    //
+    // I'm running Puma with the default 5 threads, and I wouldn't be surprised if
+    // Puma is written in such a way that multiple threads could process the messages
+    // coming in on a single web socket connection at the same time. (That would be the
+    // highest performance design after all.)
     subscribeToMatchMaking: function() {
       if (this.subscribedToMatchMaking) {
         return;
       }
       this.subscribedToMatchMaking = true;
 
+      var self = this;
+
       this.matchMakingSubscription = App.createCableSubscription('MatchMakingChannel', {
         received: function(data) {
-          if (data.error) {
-            alert(data.error);
+          if (data.new_game_id) {
+            self.subscribeToGame(data.new_game_id);
           }
         }
       });
       this.subscriptionsToRemove.push(this.matchMakingSubscription);
     },
-    subscribeToGame: function() {
+    subscribeToGame: function(gameId) {
       if (this.subscribedToGame) {
         return;
       }
@@ -33,22 +56,28 @@ App.newGame = function(options) {
 
       var self = this;
 
-      this.gameSubscription = App.createCableSubscription('GameChannel', {
-        received: function(data) {
-          if (data.game_over) {
-            (self.getOnEndCallback())();
-          }
-          if (data.game_objects) {
-            self.updateDimensions(data.game_objects);
-          }
-          if (data.game_object_positions) {
-            self.updatePositions(data.game_object_positions);
+      this.gameSubscription = App.createCableSubscription(
+        {
+          channel: 'GameChannel',
+          game_id: gameId
+        },
+        {
+          received: function(data) {
+            if (data.game_over) {
+              (self.getOnEndCallback())();
+            }
+            if (data.game_objects) {
+              self.updateDimensions(data.game_objects);
+            }
+            if (data.game_object_positions) {
+              self.updatePositions(data.game_object_positions);
+            }
           }
         }
-      });
+      );
       this.subscriptionsToRemove.push(this.gameSubscription);
 
-      this.publishInterval = setInterval(function() {
+      var publishInterval = setInterval(function() {
         var state,
           keys = self.getKeys(),
           upArrow = keys[38],
@@ -62,6 +91,7 @@ App.newGame = function(options) {
         }
         self.gameSubscription.perform('paddle', { paddle_state: state });
       }, 20);
+      this.intervalsToRemove.push(publishInterval);
     },
     updateDimensions: function(gameObjects) {
       // To do: have server assign every dimension specifically to add
