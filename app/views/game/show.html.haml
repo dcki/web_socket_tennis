@@ -1,9 +1,8 @@
 .find-game
   = label_tag 'min_velocity'
-  -# TODO increase default velocity
   = number_field_tag 'min_velocity', 1, in: 1..10
   = label_tag 'max_velocity'
-  = number_field_tag 'max_velocity', 1, in: 1..10
+  = number_field_tag 'max_velocity', 3, in: 1..10
   = button_tag 'start', class: 'start'
   = button_tag 'stop', class: 'stop'
   .message.hidden Waiting for competitor

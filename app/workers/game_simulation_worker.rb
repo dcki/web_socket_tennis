@@ -28,16 +28,13 @@ class GameSimulationWorker
         sleep(0.1)
       end
 
-      # TODO After making paddle change ball direction, if necessary, change level or
-      # object dimensions so that paddles typically must be moved to prevent losing.
-      # Make the game challenging.
       level = {
         width: 400,
         height: 200,
       }
       ball_dimensions = {
-        width: 20,
-        height: 20,
+        width: 10,
+        height: 10,
       }
       paddle_dimensions = {
         width: 20,
@@ -45,11 +42,11 @@ class GameSimulationWorker
       }
       paddle1 = {
         x: 0,
-        y: 0,
+        y: (level[:height] - paddle_dimensions[:height]) / 2,
       }
       paddle2 = {
-        x: level[:width] - ball_dimensions[:width],
-        y: 0,
+        x: level[:width] - paddle_dimensions[:width],
+        y: (level[:height] - paddle_dimensions[:height]) / 2,
       }
       ball = {
         x: 0,
@@ -80,16 +77,16 @@ class GameSimulationWorker
       loop do
         case @player1_paddle_state
         when 'up'
-          paddle1[:y] -= 2
+          paddle1[:y] -= speed
         when 'down'
-          paddle1[:y] += 2
+          paddle1[:y] += speed
         end
 
         case @player2_paddle_state
         when 'up'
-          paddle2[:y] -= 2
+          paddle2[:y] -= speed
         when 'down'
-          paddle2[:y] += 2
+          paddle2[:y] += speed
         end
 
         # TODO if collision occurs on corner of paddle, change direction of ball. The
@@ -114,8 +111,8 @@ class GameSimulationWorker
         ball[:y] += dy
 
         if (
-            ball[:x] < 0 - ball_dimensions[:width] ||
-            ball[:x] > level[:width] ||
+            ball[:x] < 0 ||
+            ball[:x] > level[:width] - ball_dimensions[:width] ||
             at_least_one_player_out_of_contact_for(5.seconds) ||
             @quit
         )

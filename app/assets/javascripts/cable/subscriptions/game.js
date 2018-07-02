@@ -1,6 +1,6 @@
 //= require cable
 
-// TODO show opponent's name.
+// TODO show player names on their sides of the field.
 // TODO show number of returns.
 // TODO implement high scores page.
 App.newGame = function(options) {
@@ -97,28 +97,23 @@ App.newGame = function(options) {
       this.intervalsToRemove.push(publishInterval);
     },
     updateDimensions: function(gameObjects) {
-      // TODO: have server assign every dimension specifically to add
-      // flexibility for what can happen in a game. For example maybe
-      // paddles change size during the game.
-      var width = gameObjects.level.width,
-        height = gameObjects.level.height,
-        ballWidth = gameObjects.ball.width;
+      var level = gameObjects.level,
+        ball = gameObjects.ball,
+        paddle = gameObjects.paddle;
 
       this.findChildElements();
 
-      this.element.style.width = width + 'px';
-      this.element.style.height = height + 'px';
+      this.element.style.width = level.width + 'px';
+      this.element.style.height = level.height + 'px';
 
-      this.paddle1El.style.width = ballWidth + 'px';
-      this.paddle1El.style.height = (2 * ballWidth) + 'px';
+      this.paddle1El.style.width = paddle.width + 'px';
+      this.paddle1El.style.height = paddle.height + 'px';
 
-      this.paddle2El.style.width = ballWidth + 'px';
-      this.paddle2El.style.height = (2 * ballWidth) + 'px';
-      this.paddle2El.style.left = (width - ballWidth) + 'px';
+      this.paddle2El.style.width = paddle.width + 'px';
+      this.paddle2El.style.height = paddle.height + 'px';
 
-      this.ballEl.style.width = ballWidth + 'px';
-      this.ballEl.style.height = ballWidth + 'px';
-      this.ballEl.style.left = ((width - ballWidth) / 2) + 'px';
+      this.ballEl.style.width = ball.width + 'px';
+      this.ballEl.style.height = ball.height + 'px';
 
       this.element.classList.remove('hidden');
       this.messageEl.classList.add('hidden');
@@ -130,7 +125,9 @@ App.newGame = function(options) {
 
       this.findChildElements();
 
+      this.paddle1El.style.left = paddle1.x + 'px';
       this.paddle1El.style.top = paddle1.y + 'px';
+      this.paddle2El.style.left = paddle2.x + 'px';
       this.paddle2El.style.top = paddle2.y + 'px';
       this.ballEl.style.left = ball.x + 'px';
       this.ballEl.style.top = ball.y + 'px';
