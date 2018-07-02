@@ -8,14 +8,9 @@ class MatchMakingChannel < ApplicationCable::Channel
   end
 
   def unsubscribed
-    # Delete any outstanding matchmaking records
+    # TODO Delete any outstanding matchmaking records
   end
 
-  # TODO this seems fragile, like dropped connections or page refreshes may lead to
-  # lingering inactive Competitor records.
-  #
-  # Or what if the client performs join_game after being pulled into an active
-  # GameSimulatorWorker?
   def join_game(data)
     # TODO notify client about result of join_game call so client can reliably communicate
     # current state to user.
@@ -35,7 +30,8 @@ class MatchMakingChannel < ApplicationCable::Channel
       # TODO if 2 requests try to lock a competitor for the same user and no competitor
       # exists, it's possible they will both create a competitor for the user. Possible
       # solution: move to data model where competitor info is stored on user instead, or
-      # where every user always has one competitor and it gets updated.
+      # where every user always has one competitor and it gets updated. Or add unique
+      # index on competitors.user_id.
       competitor = Competitor.lock('FOR UPDATE SKIP LOCKED').
         where('max_velocity >= ?', min_velocity).
         where('min_velocity <= ?',  max_velocity).

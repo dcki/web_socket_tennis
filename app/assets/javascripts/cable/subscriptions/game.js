@@ -1,5 +1,8 @@
 //= require cable
 
+// TODO show opponent's name.
+// TODO show number of returns.
+// TODO implement high scores page.
 App.newGame = function(options) {
   var game = {
     initialize: function(options) {
@@ -94,7 +97,7 @@ App.newGame = function(options) {
       this.intervalsToRemove.push(publishInterval);
     },
     updateDimensions: function(gameObjects) {
-      // To do: have server assign every dimension specifically to add
+      // TODO: have server assign every dimension specifically to add
       // flexibility for what can happen in a game. For example maybe
       // paddles change size during the game.
       var width = gameObjects.level.width,

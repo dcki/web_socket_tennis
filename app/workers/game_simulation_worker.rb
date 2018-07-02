@@ -28,6 +28,9 @@ class GameSimulationWorker
         sleep(0.1)
       end
 
+      # TODO After making paddle change ball direction, if necessary, change level or
+      # object dimensions so that paddles typically must be moved to prevent losing.
+      # Make the game challenging.
       level = {
         width: 400,
         height: 200,
@@ -89,6 +92,8 @@ class GameSimulationWorker
           paddle2[:y] += 2
         end
 
+        # TODO if collision occurs on corner of paddle, change direction of ball. The
+        # further toward the end of the paddle, the more extreme the direction change.
         if collide?(ball, ball_dimensions, paddle1, paddle_dimensions)
           dx = speed
         end
