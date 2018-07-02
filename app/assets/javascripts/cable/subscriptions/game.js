@@ -1,7 +1,8 @@
 //= require cable
 
 // TODO show player names on their sides of the field.
-// TODO show number of returns.
+// TODO show game over message on page rather than alerting.
+// TODO show number of returns counter during game.
 // TODO implement high scores page.
 App.newGame = function(options) {
   var game = {
