@@ -4,7 +4,7 @@ class GameSimulationWorker
   def perform(game_id, speed)
     @game = Game.incomplete.where(id: game_id).first
 
-    return unless @game
+    return unless @game && speed.is_a?(Numeric)
 
     record_start_time
 
@@ -29,28 +29,28 @@ class GameSimulationWorker
       end
 
       level = {
-        width: 400,
-        height: 200,
+        width: 400.0,
+        height: 200.0,
       }
       ball_dimensions = {
-        width: 10,
-        height: 10,
+        width: 10.0,
+        height: 10.0,
       }
       paddle_dimensions = {
-        width: 20,
-        height: 40,
+        width: 20.0,
+        height: 40.0,
       }
       paddle1 = {
-        x: 0,
-        y: (level[:height] - paddle_dimensions[:height]) / 2,
+        x: 0.0,
+        y: (level[:height] - paddle_dimensions[:height]) / 2.0,
       }
       paddle2 = {
         x: level[:width] - paddle_dimensions[:width],
-        y: (level[:height] - paddle_dimensions[:height]) / 2,
+        y: (level[:height] - paddle_dimensions[:height]) / 2.0,
       }
       ball = {
-        x: 0,
-        y: 0,
+        x: 0.0,
+        y: 0.0,
       }
 
       game_object_positions = {
@@ -71,6 +71,7 @@ class GameSimulationWorker
         },
       }
 
+      speed = speed.to_f
       dx = speed
       dy = speed
 
@@ -78,20 +79,26 @@ class GameSimulationWorker
         case @player1_paddle_state
         when 'up'
           paddle1[:y] -= speed
+          paddle1[:y] = [paddle1[:y], 0.0].max
         when 'down'
           paddle1[:y] += speed
+          paddle1[:y] = [paddle1[:y], level[:height] - paddle_dimensions[:height]].min
         end
 
         case @player2_paddle_state
         when 'up'
           paddle2[:y] -= speed
+          paddle2[:y] = [paddle2[:y], 0.0].max
         when 'down'
           paddle2[:y] += speed
+          paddle2[:y] = [paddle2[:y], level[:height] - paddle_dimensions[:height]].min
         end
 
         # TODO if collision occurs on corner of paddle, change direction of ball. The
         # further toward the end of the paddle, the more extreme the direction change.
         if collide?(ball, ball_dimensions, paddle1, paddle_dimensions)
+          #y_middle(paddle1, paddle_dimensions) - y_middle(ball, ball_dimensions)
+
           dx = speed
         end
 
@@ -99,19 +106,19 @@ class GameSimulationWorker
           dx = -speed
         end
 
-        if ball[:y] <= 0
-          dy = speed
+        if ball[:y] <= 0.0
+          dy = dy.abs
         end
 
         if ball[:y] + ball_dimensions[:width] >= level[:height]
-          dy = -speed
+          dy = -(dy.abs)
         end
 
         ball[:x] += dx
         ball[:y] += dy
 
         if (
-            ball[:x] < 0 ||
+            ball[:x] < 0.0 ||
             ball[:x] > level[:width] - ball_dimensions[:width] ||
             at_least_one_player_out_of_contact_for(5.seconds) ||
             @quit
