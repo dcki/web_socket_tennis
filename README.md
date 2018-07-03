@@ -38,7 +38,7 @@ Nothing unusual yet.
 
 ## How to run the test suite
 
-No tests yet.
+No tests yet. Yeah. :/
 
 ## Services (job queues, cache servers, search engines, etc.)
 
