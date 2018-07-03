@@ -94,15 +94,15 @@ class GameSimulationWorker
           paddle2[:y] = [paddle2[:y], level[:height] - paddle_dimensions[:height]].min
         end
 
-        # TODO if collision occurs on corner of paddle, change direction of ball. The
-        # further toward the end of the paddle, the more extreme the direction change.
         if collide?(ball, ball_dimensions, paddle1, paddle_dimensions)
-          #y_middle(paddle1, paddle_dimensions) - y_middle(ball, ball_dimensions)
+          dy = corner_bounce(dy, speed, paddle1, paddle_dimensions, ball, ball_dimensions)
 
           dx = speed
         end
 
         if collide?(ball, ball_dimensions, paddle2, paddle_dimensions)
+          dy = corner_bounce(dy, speed, paddle2, paddle_dimensions, ball, ball_dimensions)
+
           dx = -speed
         end
 
@@ -228,6 +228,24 @@ class GameSimulationWorker
         a[:y] + a_dim[:height] >= b[:y]
       true
     end
+  end
+
+  # This is intentionally changing not just the direction but also the speed of
+  # the ball (because it doesn't decrease dx when it increases dy). It doesn't
+  # make sense physically, but this is a game, and I think this behavior will
+  # be more fun.
+  #
+  # We could make the current movement of the paddle affect speed instead or in
+  # addition.
+  def corner_bounce(dy, speed, paddle, paddle_dimensions, ball, ball_dimensions)
+    dy + speed * magnitude(paddle, paddle_dimensions, ball, ball_dimensions)
+  end
+
+  def magnitude(paddle, paddle_dimensions, ball, ball_dimensions)
+    (
+      (ball[:y] + ball_dimensions[:height] / 2.0) -
+      (paddle[:y] + paddle_dimensions[:height] / 2.0)
+    ) / (paddle_dimensions[:height] / 2.0)
   end
 
   def at_least_one_player_out_of_contact_for(interval)
