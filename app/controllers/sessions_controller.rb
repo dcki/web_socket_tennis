@@ -24,7 +24,7 @@ class SessionsController < ApplicationController
   end
 
   def destroy
-    current_user.try(:destroy)
+    User.set_encrypted_session_id(cookies, nil)
     redirect_to root_path
   end
 end
