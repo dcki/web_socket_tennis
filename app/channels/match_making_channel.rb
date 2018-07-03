@@ -8,7 +8,7 @@ class MatchMakingChannel < ApplicationCable::Channel
   end
 
   def unsubscribed
-    # TODO Delete any outstanding matchmaking records
+    current_user.competitors.destroy_all
   end
 
   def join_game(data)
