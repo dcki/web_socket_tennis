@@ -1,7 +1,6 @@
 //= require cable
 
 // TODO show player names on their sides of the field.
-// TODO show game over message on page rather than alerting.
 // TODO show number of returns counter during game.
 // TODO implement high scores page.
 App.newGame = function(options) {
@@ -10,6 +9,7 @@ App.newGame = function(options) {
       this.element = options.gameElement;
       this.matchMakingElement = options.matchMakingElement;
       this.messageEl = this.matchMakingElement.querySelector('.message');
+      this.gameOverEl = this.matchMakingElement.querySelector('.game-over-message');
       this.subscribeToMatchMaking();
       this.initializeEventHandlers();
     },
@@ -191,7 +191,10 @@ App.newGame = function(options) {
       var self = this;
       this.onEndCallback = function() {
         self.destroy();
-        alert('Game over!');
+        self.gameOverEl.classList.remove('hidden');
+        setTimeout(function() {
+          self.gameOverEl.classList.add('hidden');
+        }, 1000);
         callback();
       }
     },
