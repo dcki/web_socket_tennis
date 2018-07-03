@@ -1,6 +1,6 @@
 # Web Socket Tennis
 
-Like Pong. Work in progress.
+Like Pong.
 
 ## Ruby version
 
@@ -8,7 +8,7 @@ See the .ruby-version file.
 
 ## System dependencies
 
-Recommend using Postgres.app for PostgreSQL.
+Recommend using Postgres.app for PostgreSQL because it's connection configuration just works out of the box with the configuration in `config/database.yml`.
 
 Recommend brew installing some things.
 
@@ -20,7 +20,7 @@ brew services start redis
 gem install bundler
 ```
 
-For some reason `bundle exec rails` is printing a bunch of 'already initialized constant' warnings. Use the bin stubs: `bin/rails`, `bin/rake`, etc.
+For some reason `bundle exec rails` is printing a bunch of 'already initialized constant' warnings. Use the bin stubs: `bin/rails`, `bin/rake`, etc. However there currently is no binstub in this app for some things, like sidekiq.
 
 Remember, if you're changing things and the behavior of the app doesn't change as you expect, and you're really confused, then you might want to try `bin/spring stop`.
 
@@ -42,15 +42,29 @@ No tests yet.
 
 ## Services (job queues, cache servers, search engines, etc.)
 
+### Sidekiq
+
+The game does not work if sidekiq is not running, including in development.
+
+Expect to see this print a bunch of 'already initialized constant' warnings. It has always worked anyway for this app so far.
+
 ```
 bundle exec sidekiq
 ```
 
-To do: run sidekiq and rails server at the same time with foreman.
+TODO: run sidekiq and rails server at the same time with foreman. Although, then all the output gets mixed together, and there is a lot of output.
 
 ## Deployment instructions
 
 No deployments yet.
+
+## Development tips
+
+- Might need to truncate the database occasionally. I've been doing that with `rake db:schema:load`. There might be a more specific command for truncating.
+- Might need to truncate redis occasionally with `redis-cli flushall` if there is an orphan game job, but hopefully such jobs will be smart enough to detect that they should exit without error to remove the job from the queue. Also there might be a more targeted way to find and delete just one sidekiq job from redis.
+- Chrome developer console network tab will show websocket messages if you select the WS filter (instead of all, xhr, etc.).
+- If something is mysteriously not working check the rails server and sidekiq output or logs. The game messages sent by clients fills up the log, and can make it difficult to see more useful information, including errors. (TODO: consider filtering those client messages from the logs.) Sometimes it can help to increase the interval in the game JavaScript to reduce the frequency of messages.
+- I often write debugging info (sometimes just line numbers so I can tell what code is being executed) to a file and `tail` that file, especially in the sidekiq jobs since I don't know how to start a debugger there.
 
 ## Plans
 
@@ -71,6 +85,8 @@ Later edit: maybe sidekiq is not the ideal solution after all. Following the imp
 Important to note that without running multiple sidekiq processes the thing will only ever take advantage of one core, because it is a Ruby process and the threads never run simeltaneously due to the global interpreter lock.
 
 Also, Delayed Job may not use threads and therefore can't be as light weight for reducing idel IO waits, but I think it does provide running multiple workers with shared memory out of the box, so it might not be a bad option after all.
+
+TODO: I read that jruby and rubinius do not have a GIL, so that may be something worth trying!
 
 It looks like the number of threads is configurable but limited: https://github.com/mperham/sidekiq/wiki/Advanced-Options#concurrency That means that the number of games that can occur at the same time is limited. Which is fine because at some point the core running a sidekiq process will be overwhelmed and that would limit the number of games anyway. It also makes knowing when to scale the number of servers easier, assuming the configured number of threads has been optimized and sidekiq let's you discover how many threads are busy (so you can scale when most are busy and the trend is such that they will be busy later too).
 
