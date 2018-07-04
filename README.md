@@ -10,31 +10,35 @@ See the .ruby-version file.
 
 Recommend using Postgres.app for PostgreSQL because it's connection configuration just works out of the box with the configuration in `config/database.yml`.
 
-Recommend brew installing some things.
+PostgreSQL 9.5 or above is required. Postgres.app lets you launch any of several PostgreSQL versions at any time. (PostgreSQL 9.5 or above is required because the MatchMakingChannel class in this app uses the `SKIP LOCKED` parameter with `SELECT FOR UPDATE`, which is only available in PostgreSQL 9.5 and above.)
 
-Recommend rbenv with ruby-build.
+On OS X I recommend installing things that ruby and gems depend on with homebrew. (I don't know what all the dependencies are for this app because I haven't gone through the full install process for this app myself yet with a completely fresh environment.)
+
+I recommend installing ruby with rbenv and ruby-build.
 
 ```
 brew install redis
 brew services start redis
+
+rbenv install $(cat .ruby-version)
+
 gem install bundler
+bundle install
 ```
 
 For some reason `bundle exec rails` is printing a bunch of 'already initialized constant' warnings. Use the bin stubs: `bin/rails`, `bin/rake`, etc. However there currently is no binstub in this app for some things, like sidekiq.
 
-Remember, if you're changing things and the behavior of the app doesn't change as you expect, and you're really confused, then you might want to try `bin/spring stop`.
+Remember, if you're changing things and the behavior of the app doesn't change as you expect, and you're really confused, then you might want to try `bin/spring stop`. (Sometimes spring gets stuck in a state and no longer reloads your code changes. spring will start again automatically next time you run any binstub, and maybe also for `bundle exec rails ...`.)
 
 ## Configuration
 
 Nothing yet.
 
-## Database creation
-
-Nothing unusual yet.
-
 ## Database initialization
 
-Nothing unusual yet.
+```
+bin/rake db:create db:schema:load
+```
 
 ## How to run the test suite
 
@@ -42,15 +46,23 @@ No tests yet. Yeah. :/
 
 ## Services (job queues, cache servers, search engines, etc.)
 
+### Rails
+
+```
+bin/rails s
+```
+
 ### Sidekiq
 
 The game does not work if sidekiq is not running, including in development.
 
-Expect to see this print a bunch of 'already initialized constant' warnings. It has always worked anyway for this app so far.
-
 ```
 bundle exec sidekiq
 ```
+
+Expect to see this print a bunch of 'already initialized constant' warnings. It has always worked anyway for this app so far.
+
+sidekiq doesn't seem to pick up code changes you make. You may need to restart it.
 
 TODO: run sidekiq and rails server at the same time with foreman. Although, then all the output gets mixed together, and there is a lot of output.
 
@@ -60,15 +72,15 @@ No deployments yet.
 
 ## Development tips
 
-- Might need to truncate the database occasionally. I've been doing that with `rake db:schema:load`. There might be a more specific command for truncating.
+- Might need to refresh browser pages or truncate the database occasionally. I've been doing that with `rake db:schema:load`. There might be a more specific command for truncating. Hopefully the issues making this necessary will be fixed soon.
 - Might need to truncate redis occasionally with `redis-cli flushall` if there is an orphan game job, but hopefully such jobs will be smart enough to detect that they should exit without error to remove the job from the queue. Also there might be a more targeted way to find and delete just one sidekiq job from redis.
 - Chrome developer console network tab will show websocket messages if you select the WS filter (instead of all, xhr, etc.).
-- If something is mysteriously not working check the rails server and sidekiq output or logs. The game messages sent by clients fills up the log, and can make it difficult to see more useful information, including errors. (TODO: consider filtering those client messages from the logs.) Sometimes it can help to increase the interval in the game JavaScript to reduce the frequency of messages.
+- If something is mysteriously not working check the rails server and sidekiq output or logs. The game messages sent by clients fill up the log, and can make it difficult to see more useful information, including errors. (TODO: consider filtering those client messages from the logs.) Sometimes it can help to increase the interval in the game JavaScript to reduce the frequency of messages.
 - I often write debugging info (sometimes just line numbers so I can tell what code is being executed) to a file and `tail` that file, especially in the sidekiq jobs since I don't know how to start a debugger there.
 
 ## Plans
 
-I'd like to write a web app that allows users to play a pong-like game with other users.
+I'd like to write a web app that allows users to play a pong-like game with other users over the Internet.
 
 A matchmaking system would prompt users for the difficulty level they want to play at and put 2 players into a game if their desired difficulty levels match.
 
