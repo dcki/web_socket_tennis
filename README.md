@@ -69,9 +69,16 @@ sidekiq doesn't seem to pick up code changes you make. You may need to restart i
 
 TODO: run sidekiq and rails server at the same time with foreman. Although, then all the output gets mixed together, and there is a lot of output.
 
+## Known bugs
+
+- Starting a new game after finishing a game sometimes does not work. I think this is due to a race condition during attempts to unsubscribe and then immediately subscribe again to the same MatchMakingChannel. See comment in JavaScript for more details and intended fix.
+
+- When a user specifies a higher speed that does not necessarily increase difficulty. Ideally it would.
+  - The vertical velocity of the ball can be changed by hitting the ball close to the end of a paddle. This does not influence the horizontal velocity, so the speed of the ball can change. (This isn't physically realistic, but it is fun.) However, horizontal ball velocity and paddle speed are both specified by users, and choosing a low speed provides slow paddles, which make it more difficult to intercept a ball that is moving vertically at high velocity. Maybe it would be better to keep the ball speed constant after all.
+
 ## Deployment instructions
 
-No deployments yet.
+Work in progress.
 
 ## Development tips
 
