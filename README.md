@@ -42,7 +42,10 @@ bin/rake db:create db:schema:load
 
 ## How to run the test suite
 
-No tests yet. Yeah. :/
+```
+bin/rake db:test:prepare
+bin/rails test
+```
 
 ## Services (job queues, cache servers, search engines, etc.)
 
