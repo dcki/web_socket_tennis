@@ -38,6 +38,9 @@ gem install bundler
 # postgresql-devel is needed to install pg gem.
 sudo yum install -y git postgresql-devel
 
+# mini_racer needs g++, and this installs g++.
+sudo yum groupinstall "Development Tools"
+
 cd /web_socket_tennis_and_dependencies
 git clone https://github.com/dcki/web_socket_tennis.git
 cd web_socket_tennis
