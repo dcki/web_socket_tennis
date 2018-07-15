@@ -1,6 +1,3 @@
-# TODO Communicating between client and server with Action Cable seems to generally
-# be more complex than using regular Rails controllers. The work done by this channel
-# should probably all be done in a controller instead.
 class MatchMakingChannel < ApplicationCable::Channel
   def subscribed
     stream_for current_user
