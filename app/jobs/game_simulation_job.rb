@@ -72,8 +72,7 @@ class GameSimulationJob
       }
 
       speed = speed.to_f
-      dx = speed
-      dy = speed
+      dx = dy = Math.sqrt(speed**2 / 2.0)
 
       loop do
         case @player1_paddle_state
@@ -97,13 +96,13 @@ class GameSimulationJob
         if collide?(ball, ball_dimensions, paddle1, paddle_dimensions)
           dy = corner_bounce(dy, speed, paddle1, paddle_dimensions, ball, ball_dimensions)
 
-          dx = speed
+          dx = Math.sqrt(speed**2 - dy**2)
         end
 
         if collide?(ball, ball_dimensions, paddle2, paddle_dimensions)
           dy = corner_bounce(dy, speed, paddle2, paddle_dimensions, ball, ball_dimensions)
 
-          dx = -speed
+          dx = -Math.sqrt(speed**2 - dy**2)
         end
 
         if ball[:y] <= 0.0
@@ -230,15 +229,13 @@ class GameSimulationJob
     end
   end
 
-  # This is intentionally changing not just the direction but also the speed of
-  # the ball (because it doesn't decrease dx when it increases dy). It doesn't
-  # make sense physically, but this is a game, and I think this behavior will
-  # be more fun.
-  #
   # We could make the current movement of the paddle affect speed instead or in
   # addition.
   def corner_bounce(dy, speed, paddle, paddle_dimensions, ball, ball_dimensions)
-    dy + speed * magnitude(paddle, paddle_dimensions, ball, ball_dimensions)
+    dy += speed * magnitude(paddle, paddle_dimensions, ball, ball_dimensions)
+    dy = 0.9 * speed if dy > 0.9 * speed
+    dy = -0.9 * speed if dy < -0.9 * speed
+    dy
   end
 
   def magnitude(paddle, paddle_dimensions, ball, ball_dimensions)
