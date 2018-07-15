@@ -69,10 +69,6 @@ sidekiq doesn't seem to pick up code changes you make. You may need to restart i
 
 TODO: run sidekiq and rails server at the same time with foreman. Although, then all the output gets mixed together, and there is a lot of output.
 
-## Known bugs
-
-- Starting a new game after finishing a game sometimes does not work. I think this is due to a race condition during attempts to unsubscribe and then immediately subscribe again to the same MatchMakingChannel. See comment in JavaScript for more details and intended fix.
-
 ## Deployment instructions
 
 Work in progress.

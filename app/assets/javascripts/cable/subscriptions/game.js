@@ -8,33 +8,12 @@ App.newGame = function(options) {
     initialize: function(options) {
       this.element = options.gameElement;
       this.matchMakingElement = options.matchMakingElement;
+      this.matchmakingCounter = options.gameCounter;
       this.messageEl = this.matchMakingElement.querySelector('.message');
       this.gameOverEl = this.matchMakingElement.querySelector('.game-over-message');
       this.subscribeToMatchMaking();
       this.initializeEventHandlers();
     },
-    // TODO move matchmaking subscription out of game "class" and share it between
-    // game instances to avoid race condition with unsubscribing and re-subscribing
-    // too close together.
-    //
-    // I think a possible race condition could lead to being in an erroneous
-    // unsubscribed state, because the unsubscribe message may sometimes arrive after
-    // the re-subscribe message. At least, I've seen a behavior for which that seems
-    // like a potential explanation. After a game has ended, something prevents a new
-    // game from starting, and this error occurs every time a client sends a game
-    // update message:
-    //
-    // Could not execute command from ({"command"=>"message", "identifier"=>"{\"channel\":\"GameChannel\"}", "data"=>"{\"paddle_state\":\"stop\",\"action\":\"paddle\"}"}) [RuntimeError - Unable to find subscription with identifier: {"channel":"GameChannel"}]
-    //
-    // Either there are multiple action cable workers processing the messages concurrently
-    // (I haven't checked) or action cable web socket messages can arrive out of order (I
-    // haven't researched that yet). Or there is another explanation for that behavior and
-    // error.
-    //
-    // I'm running Puma with the default 5 threads, and I wouldn't be surprised if
-    // Puma is written in such a way that multiple threads could process the messages
-    // coming in on a single web socket connection at the same time. (That would be the
-    // highest performance design after all.)
     subscribeToMatchMaking: function() {
       if (this.subscribedToMatchMaking) {
         return;
@@ -43,13 +22,19 @@ App.newGame = function(options) {
 
       var self = this;
 
-      this.matchMakingSubscription = App.createCableSubscription('MatchMakingChannel', {
-        received: function(data) {
-          if (data.new_game_id) {
-            self.subscribeToGame(data.new_game_id);
+      this.matchMakingSubscription = App.createCableSubscription(
+        {
+          channel: 'MatchMakingChannel',
+          unique_channel_id: this.matchmakingCounter
+        },
+        {
+          received: function(data) {
+            if (data.new_game_id) {
+              self.subscribeToGame(data.new_game_id);
+            }
           }
         }
-      });
+      );
       this.subscriptionsToRemove.push(this.matchMakingSubscription);
     },
     subscribeToGame: function(gameId) {

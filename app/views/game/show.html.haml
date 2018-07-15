@@ -16,10 +16,13 @@
 
 :javascript
   (function() {
+    var gameCounter = 0;
     var restart = function() {
+      gameCounter++;
       var game = App.newGame({
         matchMakingElement: document.querySelector('.find-game'),
-        gameElement: document.querySelector('.game-field')
+        gameElement: document.querySelector('.game-field'),
+        gameCounter: gameCounter
       });
       game.setOnEndCallback(function() {
         setTimeout(restart, 0);
