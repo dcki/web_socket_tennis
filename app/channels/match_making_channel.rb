@@ -54,7 +54,7 @@ class MatchMakingChannel < ApplicationCable::Channel
       MatchMakingChannel.broadcast_to(game.users[0], new_game_id: game.id)
       MatchMakingChannel.broadcast_to(game.users[1], new_game_id: game.id)
 
-      GameSimulationWorker.perform_async(
+      GameSimulationJob.perform_async(
         game.id,
         [competitor.max_velocity, max_velocity].min
       )

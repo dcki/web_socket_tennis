@@ -1,4 +1,4 @@
-class GameSimulationWorker
+class GameSimulationJob
   include Sidekiq::Worker
 
   def perform(game_id, speed)
